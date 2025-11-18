@@ -1,0 +1,23 @@
+# Use official Node.js LTS image
+FROM node:20-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files first (for caching)
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --only=production
+
+# Copy all source code
+COPY . .
+
+# Expose the port (from .env)
+EXPOSE 5000
+
+# Use environment variable if set
+ENV NODE_ENV=production
+
+# Start the app
+CMD ["node", "server.js"]
