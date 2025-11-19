@@ -39,13 +39,14 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/stores', require('./routes/stores'));
-app.use('/api/ratings', require('./routes/ratings'));
-app.use('/api/admin', require('./routes/admin'));
-app.use('/api/user', require('./routes/user'));
-app.use('/api/owner', require('./routes/owner'));
+// ------------------ Routes ------------------
+app.use('/api/auth', require('./src/routes/auth'));
+app.use('/api/stores', require('./src/routes/stores'));
+app.use('/api/ratings', require('./src/routes/ratings'));
+app.use('/api/admin', require('./src/routes/admin'));
+app.use('/api/user', require('./src/routes/user'));
+app.use('/api/owner', require('./src/routes/owner'));
+
 
 // Health check
 app.get('/', (req, res) => {
