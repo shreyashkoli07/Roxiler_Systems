@@ -1,8 +1,10 @@
-const { User, Store, Rating } = require('../models');
+const { User, Store, Rating } = require('../../index.js');   // FIXED PATH
 const { Op } = require('sequelize');
 const { hashPassword } = require('../utils/hash');
 
+// ======================
 // Admin Dashboard Counts
+// ======================
 exports.dashboard = async (req, res) => {
   try {
     const totalUsers = await User.count();
@@ -11,12 +13,14 @@ exports.dashboard = async (req, res) => {
 
     res.json({ totalUsers, totalStores, totalRatings });
   } catch (err) {
-    console.error(err);
+    console.error("Dashboard Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Admin: List users with filters + pagination + sorting
+// =======================================================
+// Admin: List Users with Filters + Pagination + Sorting
+// =======================================================
 exports.listUsers = async (req, res) => {
   try {
     const { q, role, page = 1, limit = 10, sortBy = 'name', order = 'ASC' } = req.query;
@@ -43,12 +47,14 @@ exports.listUsers = async (req, res) => {
     res.json({ total: users.count, users: users.rows });
 
   } catch (err) {
-    console.error(err);
+    console.error("List Users Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
 
-// Admin: Create a user (Admin, Store Owner, or Normal User)
+// =======================================================
+// Admin: Create a User (Admin, Store Owner, or Normal User)
+// =======================================================
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, address, role } = req.body;
@@ -58,16 +64,19 @@ exports.createUser = async (req, res) => {
       return res.status(422).json({ message: "Name must be 20–60 characters" });
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-      return res.status(422).json({ message: "Invalid email" });
+      return res.status(422).json({ message: "Invalid email format" });
 
     if (!password || !/^(?=.{8,16}$)(?=.*[A-Z])(?=.*[^A-Za-z0-9]).*$/.test(password))
-      return res.status(422).json({ message: "Password must be 8–16 chars with uppercase & special char" });
+      return res.status(422).json({
+        message: "Password must be 8–16 chars with uppercase & special char"
+      });
 
     const allowedRoles = ["ADMIN", "USER", "STORE_OWNER"];
     const finalRole = allowedRoles.includes(role) ? role : "USER";
 
     const exists = await User.findOne({ where: { email } });
-    if (exists) return res.status(400).json({ message: "Email already exists" });
+    if (exists)
+      return res.status(400).json({ message: "Email already exists" });
 
     const hashed = await hashPassword(password);
 
@@ -88,7 +97,7 @@ exports.createUser = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Create User Error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

@@ -1,11 +1,13 @@
-
-const { Store, Rating, User } = require('../models');
+const { Store, Rating, User } = require('../index'); // <-- FIXED: matches new folder structure
 
 exports.getOwnerRatings = async (req, res) => {
   try {
     const ownerId = Number(req.params.ownerId);
 
-    // Fetching all stores of this owner with ratings + user info
+    if (!ownerId)
+      return res.status(400).json({ message: "Invalid ownerId" });
+
+    // Fetch all stores of the owner including ratings + respective user info
     const stores = await Store.findAll({
       where: { owner_id: ownerId },
       include: [
@@ -28,30 +30,33 @@ exports.getOwnerRatings = async (req, res) => {
       ]
     });
 
-    // response
+    // Create the final response structure
     const result = stores.map(store => {
-      const ratings = Array.isArray(store.ratings)
-        ? store.ratings.map(r => ({
-          id: r.id,
-          user_id: r.user?.id ?? null,
-          user_name: r.user?.name ?? "Unknown",
-          email: r.user?.email ?? "",
-          rating: Number(r.rating) || 0,
-          comment: r.comment ?? "",
-          created_at: r.createdAt ?? null
-        }))
-        : [];
+      const ratingsArray = Array.isArray(store.ratings) ? store.ratings : [];
 
-      const avg = ratings.length
-        ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
-        : null;
+      const ratings = ratingsArray.map(r => ({
+        id: r.id,
+        user_id: r.user?.id || null,
+        user_name: r.user?.name || "Unknown",
+        email: r.user?.email || "",
+        rating: Number(r.rating) || 0,
+        comment: r.comment || "",
+        created_at: r.createdAt || null
+      }));
+
+      const avgRating =
+        ratings.length > 0
+          ? Number(
+              (ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length).toFixed(2)
+            )
+          : null;
 
       return {
         id: store.id,
         name: store.name,
         address: store.address,
-        owner_name: store.owner?.name ?? null,
-        average: avg !== null ? Number(avg.toFixed(2)) : null,
+        owner_name: store.owner?.name || null,
+        average: avgRating,
         ratings
       };
     });

@@ -1,14 +1,16 @@
-const { User } = require('../models');
+const { User } = require('../../index.js');   // FIXED PATH
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-
+// Utility functions
 const hashPassword = async (password) => await bcrypt.hash(password, 10);
 const comparePassword = async (password, hashed) => await bcrypt.compare(password, hashed);
 const signToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-// Register
+// =============================
+// REGISTER
+// =============================
 exports.register = async (req, res) => {
   try {
     const { name, email, password, address, role } = req.body;
@@ -17,7 +19,8 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "Name, email, and password are required" });
 
     const exists = await User.findOne({ where: { email } });
-    if (exists) return res.status(400).json({ message: "Email already exists" });
+    if (exists) 
+      return res.status(400).json({ message: "Email already exists" });
 
     const hashed = await hashPassword(password);
 
@@ -37,12 +40,14 @@ exports.register = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Register Error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
 
-// Login
+// =============================
+// LOGIN
+// =============================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,10 +56,12 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
 
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(400).json({ message: "Invalid credentials" });
+    if (!user)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await comparePassword(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     const token = signToken({
       id: user.id,
@@ -73,7 +80,7 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Login Error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
