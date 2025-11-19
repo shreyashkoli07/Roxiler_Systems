@@ -18,9 +18,7 @@ app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true); // server-to-server requests
-
       if (allowedOrigins.includes(origin)) return callback(null, true);
-
       return callback(new Error("CORS Blocked: Origin Not Allowed"));
     },
     credentials: true,
@@ -29,6 +27,7 @@ app.use(
   })
 );
 
+// OPTIONS preflight handler
 app.use((req, res, next) => {
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
@@ -43,7 +42,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rate limiting for auth routes
+// ------------------ Rate Limiting ------------------
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
@@ -60,7 +59,10 @@ app.use("/api/admin", require("./routes/admin"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/owner", require("./routes/owner"));
 
-app.get("/", (req, res) => res.json({ status: "OK", message: "API running 🚀" }));
+// ------------------ Health Check ------------------
+app.get("/healthz", (req, res) => {
+  res.status(200).json({ status: "OK", message: "API is running 🚀" });
+});
 
 // ------------------ Global Error Handler ------------------
 app.use((err, req, res, next) => {
@@ -73,9 +75,9 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    console.log("Connecting to DB...");
+    console.log("Connecting to database...");
     await sequelize.authenticate();
-    console.log("DB connected successfully");
+    console.log("Database connected successfully");
 
     if (process.env.DB_SYNC === "true") {
       await sequelize.sync({ alter: false }); // use { force: true } only in dev
@@ -83,10 +85,10 @@ const startServer = async () => {
     }
 
     const server = app.listen(PORT, () => {
-      console.log(`Server running at http://localhost:${PORT}`);
+      console.log(`🚀 Server running on port ${PORT}`);
     });
 
-    // Graceful shutdown
+    // ------------------ Graceful Shutdown ------------------
     const gracefulShutdown = async () => {
       console.log("⚡ Closing server...");
       await sequelize.close();
@@ -100,7 +102,7 @@ const startServer = async () => {
     process.on("SIGTERM", gracefulShutdown);
 
   } catch (err) {
-    console.error("DB connection error:", err.message);
+    console.error("DB connection error:", err);
     process.exit(1); // stop server if DB fails
   }
 };
