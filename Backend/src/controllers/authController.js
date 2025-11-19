@@ -8,9 +8,9 @@ const comparePassword = async (password, hashed) => await bcrypt.compare(passwor
 const signToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-// =============================
+
 // REGISTER
-// =============================
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password, address, role } = req.body;
@@ -45,9 +45,9 @@ exports.register = async (req, res) => {
   }
 };
 
-// =============================
+
 // LOGIN
-// =============================
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;

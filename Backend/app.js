@@ -1,4 +1,4 @@
-// Backend/app.js
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -10,8 +10,9 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175",
-  process.env.FRONTEND_URL
-];
+  "https://your-frontend.vercel.app",
+  process.env.FRONTEND_URL?.trim()
+].filter(Boolean); 
 
 app.use(cors({
   origin: function(origin, callback) {

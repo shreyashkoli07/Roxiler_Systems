@@ -1,4 +1,4 @@
-const { Store, Rating, User } = require('../index');  // UPDATED PATH
+const { Store, Rating, User } = require('../../index');  
 const { Op } = require('sequelize');
 
 // --------------------- CREATE STORE ---------------------
@@ -12,7 +12,7 @@ exports.createStore = async (req, res) => {
       });
     }
 
-    // Optional: email validation
+    //email validation
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ message: "Invalid store email" });
     }
@@ -43,7 +43,7 @@ exports.listStores = async (req, res) => {
       where.name = { [Op.like]: `%${q}%` };
     }
 
-    // Allow only safe sorting fields
+    // sorting fields
     const allowedSort = ['name', 'email', 'createdAt'];
     if (!allowedSort.includes(sortBy)) sortBy = 'name';
 
@@ -68,7 +68,7 @@ exports.listStores = async (req, res) => {
       offset: (page - 1) * limit,
     });
 
-    // Reformat response with average ratings
+    //  average ratings
     const formatted = stores.rows.map((store) => {
       const ratings = store.ratings || [];
       const ratingValues = ratings.map(r => Number(r.rating) || 0);

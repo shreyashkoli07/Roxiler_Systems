@@ -1,9 +1,9 @@
-const { User } = require('../index');   // UPDATED MODEL PATH
+const { User } = require('../../index');   
 const { hashPassword } = require('../utils/hash');
 
-// -----------------------------------
-// Get logged-in user profile
-// -----------------------------------
+
+// logged-in user profile
+
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findByPk(req.user.id, {
@@ -22,9 +22,9 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-// -----------------------------------
+
 // Update Profile (name, address, password)
-// -----------------------------------
+
 exports.updateProfile = async (req, res) => {
   try {
     const { name, address, password } = req.body;
@@ -34,9 +34,9 @@ exports.updateProfile = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // =====================
+    
     // VALIDATIONS
-    // =====================
+    
 
     if (name && name.length < 3) {
       return res.status(400).json({ message: "Name must be at least 3 characters" });
@@ -52,9 +52,9 @@ exports.updateProfile = async (req, res) => {
       }
     }
 
-    // =====================
+    
     // APPLY UPDATES
-    // =====================
+ 
     if (name) user.name = name;
     if (address) user.address = address;
 

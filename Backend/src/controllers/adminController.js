@@ -2,9 +2,9 @@ const { User, Store, Rating } = require('../../index.js');   // FIXED PATH
 const { Op } = require('sequelize');
 const { hashPassword } = require('../utils/hash');
 
-// ======================
+
 // Admin Dashboard Counts
-// ======================
+
 exports.dashboard = async (req, res) => {
   try {
     const totalUsers = await User.count();
@@ -18,9 +18,9 @@ exports.dashboard = async (req, res) => {
   }
 };
 
-// =======================================================
+
 // Admin: List Users with Filters + Pagination + Sorting
-// =======================================================
+
 exports.listUsers = async (req, res) => {
   try {
     const { q, role, page = 1, limit = 10, sortBy = 'name', order = 'ASC' } = req.query;
@@ -52,9 +52,9 @@ exports.listUsers = async (req, res) => {
   }
 };
 
-// =======================================================
+
 // Admin: Create a User (Admin, Store Owner, or Normal User)
-// =======================================================
+
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, address, role } = req.body;

@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Ensure required env variables are set
+//env variables
 const requiredEnv = ['DB_NAME', 'DB_USER', 'DB_PASS', 'DB_HOST'];
 requiredEnv.forEach(key => {
   if (!process.env[key]) {
@@ -49,17 +49,17 @@ const connectDB = async () => {
     console.log('Database connected successfully');
 
     if (process.env.DB_SYNC === "true") {
-      await sequelize.sync({ alter: false }); // change to { force: true } only for dev
+      await sequelize.sync({ alter: false }); 
       console.log('Models synced with the database');
     }
   } catch (error) {
     console.error('DB Connection Error:', error.message);
     console.error(error);
-    process.exit(1); // stop the process if DB connection fails
+    process.exit(1); 
   }
 };
 
-// Graceful shutdown
+
 const closeDB = async () => {
   try {
     console.log('Closing DB connection...');

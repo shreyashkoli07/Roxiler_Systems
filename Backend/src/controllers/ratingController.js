@@ -1,4 +1,4 @@
-const { Rating, Store, sequelize } = require('../index'); // UPDATED PATH
+const { Rating, Store, sequelize } = require('../../index'); 
 
 exports.submitOrUpdateRating = async (req, res) => {
   const t = await sequelize.transaction();
@@ -12,12 +12,12 @@ exports.submitOrUpdateRating = async (req, res) => {
 
     const ratingValue = Number(rating);
 
-    // Validate rating range (1–5)
+    
     if (ratingValue < 1 || ratingValue > 5) {
       return res.status(400).json({ message: "Rating must be between 1 and 5" });
     }
 
-    // Check if rating exists
+    
     let existing = await Rating.findOne({
       where: { user_id, store_id },
       transaction: t
@@ -34,7 +34,7 @@ exports.submitOrUpdateRating = async (req, res) => {
       );
     }
 
-    // Recalculate store average rating
+    
     const ratings = await Rating.findAll({
       where: { store_id },
       transaction: t

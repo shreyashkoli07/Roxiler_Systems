@@ -1,4 +1,4 @@
-const { Store, Rating, User } = require('../index'); // <-- FIXED: matches new folder structure
+const { Store, Rating, User } = require('../../index'); 
 
 exports.getOwnerRatings = async (req, res) => {
   try {
@@ -30,7 +30,7 @@ exports.getOwnerRatings = async (req, res) => {
       ]
     });
 
-    // Create the final response structure
+   
     const result = stores.map(store => {
       const ratingsArray = Array.isArray(store.ratings) ? store.ratings : [];
 

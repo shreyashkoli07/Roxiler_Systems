@@ -1,4 +1,4 @@
-// Backend/server.js
+
 require('dotenv').config();
 const app = require('./app');
 const { sequelize } = require('./index');
@@ -17,12 +17,12 @@ const startServer = async () => {
     }
 
     const server = app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`Server running on port ${PORT}`);
     });
 
     // Graceful shutdown
     const gracefulShutdown = async () => {
-      console.log("⚡ Closing server and database...");
+      console.log("Closing server and database...");
       await sequelize.close();
       server.close(() => {
         console.log("Server and DB connections closed");
