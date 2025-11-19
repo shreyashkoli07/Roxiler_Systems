@@ -1,8 +1,10 @@
+// Backend/index.js
 const { Sequelize } = require('sequelize');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+// Initialize Sequelize
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -25,7 +27,7 @@ const db = {};
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
-// Load models
+// Load all models in this directory except index.js
 fs.readdirSync(__dirname)
   .filter(file => file !== 'index.js' && file.endsWith('.js'))
   .forEach(file => {
@@ -37,34 +39,5 @@ fs.readdirSync(__dirname)
 Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) db[modelName].associate(db);
 });
-
-// Test DB connection
-(async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("Database connected successfully");
-
-    if (process.env.DB_SYNC === "true") {
-      await sequelize.sync({ alter: false });
-      console.log("Models synced successfully");
-    }
-  } catch (err) {
-    console.error("DB Connection Error:", err.message);
-    process.exit(1); // Exit if DB fails
-  }
-})();
-
-// Graceful shutdown
-const closeDB = async () => {
-  try {
-    await sequelize.close();
-    console.log("DB connection closed");
-  } catch (err) {
-    console.error("Error closing DB connection:", err);
-  }
-  process.exit(0);
-};
-process.on('SIGINT', closeDB);
-process.on('SIGTERM', closeDB);
 
 module.exports = db;

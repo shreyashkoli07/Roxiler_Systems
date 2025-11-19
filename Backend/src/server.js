@@ -1,76 +1,8 @@
+// Backend/server.js
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const { sequelize } = require('./models');
+const app = require('./app');
+const { sequelize } = require('./index');
 
-const app = express();
-
-// ------------------ CORS CONFIG ------------------
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:5175",
-  process.env.FRONTEND_URL
-];
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // server-to-server requests
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("CORS Blocked: Origin Not Allowed"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
-
-// OPTIONS preflight handler
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// ------------------ Middlewares ------------------
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// ------------------ Rate Limiting ------------------
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20,
-  message: "Too many login attempts. Please try again later."
-});
-app.use("/api/auth/login", authLimiter);
-app.use("/api/auth/register", authLimiter);
-
-// ------------------ Routes ------------------
-app.use("/api/auth", require("./routes/auth"));
-app.use("/api/stores", require("./routes/stores"));
-app.use("/api/ratings", require("./routes/ratings"));
-app.use("/api/admin", require("./routes/admin"));
-app.use("/api/user", require("./routes/user"));
-app.use("/api/owner", require("./routes/owner"));
-
-// ------------------ Health Check ------------------
-app.get("/healthz", (req, res) => {
-  res.status(200).json({ status: "OK", message: "API is running 🚀" });
-});
-
-// ------------------ Global Error Handler ------------------
-app.use((err, req, res, next) => {
-  console.error("Server Error:", err);
-  res.status(500).json({ message: "Internal Server Error", error: err.message });
-});
-
-// ------------------ Start Server ------------------
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
@@ -80,7 +12,7 @@ const startServer = async () => {
     console.log("Database connected successfully");
 
     if (process.env.DB_SYNC === "true") {
-      await sequelize.sync({ alter: false }); // use { force: true } only in dev
+      await sequelize.sync({ alter: false });
       console.log("Models synced successfully");
     }
 
@@ -88,9 +20,9 @@ const startServer = async () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
 
-    // ------------------ Graceful Shutdown ------------------
+    // Graceful shutdown
     const gracefulShutdown = async () => {
-      console.log("⚡ Closing server...");
+      console.log("⚡ Closing server and database...");
       await sequelize.close();
       server.close(() => {
         console.log("Server and DB connections closed");
@@ -98,12 +30,14 @@ const startServer = async () => {
       });
     };
 
-    process.on("SIGINT", gracefulShutdown);
-    process.on("SIGTERM", gracefulShutdown);
+    process.on('SIGINT', gracefulShutdown);
+    process.on('SIGTERM', gracefulShutdown);
 
   } catch (err) {
-    console.error("DB connection error:", err);
-    process.exit(1); // stop server if DB fails
+    console.error("DB connection failed:", err.message);
+    console.error(err);
+    // Throw error without exiting immediately (Render will log it)
+    throw err;
   }
 };
 
